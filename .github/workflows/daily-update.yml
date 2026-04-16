@@ -1,0 +1,31 @@
+name: Daily AI Pulse
+
+on:
+  schedule:
+    - cron: '0 1 * * *'  # 每天 10:50 上海时间
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4
+      
+      - name: Generate Report
+        run: python scripts/generate_report.py
+      
+      - name: Commit and Push
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Daily Update: $(date +%Y-%m-%d)" || echo "No changes to commit"
+          git push
